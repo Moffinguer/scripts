@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 local route="./SO_SCRIPTS"
 
 case "$OSTYPE" in
@@ -9,15 +8,15 @@ case "$OSTYPE" in
 		case "$distro" in
 			*"Arch Linux"*)
 				echo "ArchLinux Distro Detected"
-				"$route"/archlinux
+				"$route"/archlinux.sh
 				;;
 				*"Debian"*)
 				echo "Debian Distro Detected"
-						"$route"/debian
+						"$route"/debian.sh
 						;;
 				*"Gentoo"*)
 				#echo "Gentoo Distro Detected"
-						"$route"/gentoo
+						"$route"/gentoo.sh
 						;;
 			*)
 				echo "Cannot load packages for $distro"
@@ -27,7 +26,7 @@ case "$OSTYPE" in
 		;;
 		*"darwin"*)
 			echo "MacOS System Detected"
-				"$route"/macos
+				"$route"/macos.sh
 				;;
 		*"msys"* | *"cygwin"*)
 			echo "Windows System Detected"
