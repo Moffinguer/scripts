@@ -1,0 +1,56 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <file>"
+    exit 1
+fi
+
+file="$1"
+
+decompress_tar() {
+    if tar -tzf "$file" &> /dev/null; then
+        tar -xzf "$file"
+    elif tar -tjf "$file" &> /dev/null; then
+        tar -xjf "$file"
+    elif tar -tJf "$file" &> /dev/null; then
+        tar -xJf "$file"
+    else
+        echo "Unable to determine tar format: $file"
+    fi
+}
+
+decompress_zip() {
+    if unzip -l "$file" &> /dev/null; then
+        unzip "$file"
+    else
+        echo "Unable to determine zip format: $file"
+    fi
+}
+
+decompress_7z() {
+    if 7z l "$file" &> /dev/null; then
+        7z x "$file"
+    else
+        echo "Unable to determine 7z format: $file"
+    fi
+}
+
+decompress_rar() {
+    if unrar l "$file" &> /dev/null; then
+        unrar x "$file"
+    else
+        echo "Unable to determine rar format: $file"
+    fi
+}
+
+if file "$file" | grep -q "tar archive"; then
+    decompress_tar
+elif file "$file" | grep -q "Zip archive"; then
+    decompress_zip
+elif file "$file" | grep -q "7-zip archive"; then
+    decompress_7z
+elif file "$file" | grep -q "RAR archive"; then
+    decompress_rar
+else
+    echo "Unsupported file format: $file"
+fi
