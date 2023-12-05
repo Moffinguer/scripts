@@ -1,37 +1,38 @@
 #!/bin/bash
 
-local route="./SO_SCRIPTS"
+local route="./scripts"
 
 case "$OSTYPE" in
 	*"linux-gnu"*)
 		local distro=$(cat /etc/os-release | grep -ie "^NAME=" | awk -F '=' '{gsub(/"/, "", $2); print $2}')
 		case "$distro" in
-			*"Arch Linux"*)
+			*"Arch"*)
 				echo "ArchLinux Distro Detected"
-				"$route"/archlinux.sh
+				local argument="arch"
 				;;
-				*"Debian"*)
+			*"Debian"*)
 				echo "Debian Distro Detected"
-						"$route"/debian.sh
-						;;
-				*"Gentoo"*)
-				#echo "Gentoo Distro Detected"
-						"$route"/gentoo.sh
-						;;
+				local argument="debian"
+				;;
+			*"Gentoo"*)
+				echo "Gentoo Distro Detected"
+				local argument="gentoo"
+				;;
 			*)
 				echo "Cannot load packages for $distro"
 				exit 1
 				;;
 		esac
+		"$route"/unix.sh "$argument"
 		;;
-		*"darwin"*)
-			echo "MacOS System Detected"
-				"$route"/macos.sh
-				;;
-		*"msys"* | *"cygwin"*)
-			echo "Windows System Detected"
-				powershell.exe -ExecutionPolicy Bypass "$route"/windows.ps1
-				;;
+	*"darwin"*)
+		echo "MacOS System Detected"
+		"$route"/macos.sh
+		;;
+	*"msys"* | *"cygwin"*)
+		echo "Windows System Detected"
+		powershell.exe -ExecutionPolicy Bypass "$route"/windows.ps1
+		;;
 	*)
 		echo "SO Not detected"
 		exit 1
