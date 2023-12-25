@@ -54,7 +54,7 @@ function install_packages {
 
 	## install_wm
 	echo "Choose Window Managers:"
-	install_option "BSPQM" "bspwm sxhkd"
+	install_option "BSWQM" "bspwm sxhkd"
 	install_option "Qtile" "qtile"
 	install_option "Polybar" "polybar"
 
