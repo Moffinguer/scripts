@@ -3,22 +3,15 @@
 URL='https://archlinux.org/mirrorlist/?country=ES&country=PT&country=FR&country=GB&country=IT&country=US&country=CH&protocol=http&protocol=https&use_mirror_status=on'
 MIRRORLIST="/etc/pacman.d/mirrorlist"
 
-curl "$URL" \
-    | grep -v '## Germany' \
-    | sed 's/^#Server/Server/g' \
-    | rankmirrors -n 20 - \
-    > "$MIRRORLIST.new"
+curl -s "$URL" | sed 's/^#Server/Server/g' | rankmirrors -n 20 - > "$MIRRORLIST.new"
 
 if [[ $? ]]; then
 	echo "Connection to Archlinux.org could not be established try again"
+	exit 1
 fi
 
-if [[ -s "$MIRRORLIST.new" ]]; then
-    mv "$MIRRORLIST.new" "$MIRRORLIST"
-fi
+[[ -s "$MIRRORLIST.new" ]] && mv "$MIRRORLIST.new" "$MIRRORLIST"
 
-notify-send "Rankmirrors updated" "NOW"
-
-echo "Rankmirrors updated"
+notify-send "Rankmirrors updated" "NOW" || echo "Rankmirrors updated"
 
 exit 0
