@@ -1,0 +1,38 @@
+# Base path
+base_path="$HOME/Documents/git"
+
+directories=$(find "$base_path" -maxdepth 1 -type d)
+
+for dir in $directories; do
+    if [ ! -d "$dir/.git" ]; then
+        echo "Skipping non-local repository at: $dir"
+        continue
+    fi
+
+    echo "Processing repository at: $dir"
+
+    cd "$dir" || exit
+
+    branches=$(git branch | sed 's/* //')
+
+    for branch in $branches; do
+        git checkout "$branch"
+
+        if [ -n "$(git status --porcelain)" ]; then
+            echo "  Processing branch: $branch"
+
+            git pull --rebase
+
+            # Check for conflicts
+            if [ -n "$(git ls-files -u)" ]; then
+                echo "    Conflicts in the repository! Skipping to the next repository."
+                git rebase --abort
+                break
+            else
+                git push
+            fi
+        fi
+    done
+
+    cd "$base_path" || exit
+done
