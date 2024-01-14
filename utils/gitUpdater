@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Base path
 base_path="$HOME/Documents/git"
 
