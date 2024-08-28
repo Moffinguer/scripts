@@ -42,7 +42,7 @@ Execute one of this scripts:
 ```bash
  # You need a bash terminal for this, install git and run it
   winget install -e --id Git.Git # With a Windows Terminal
- ./unix.sh # On a Bash Terminal
+ cd .. && ./installer.sh # On a Bash Terminal
 ```
 ```ps1
 .\windows.ps1
