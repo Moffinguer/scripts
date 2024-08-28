@@ -153,10 +153,12 @@ fi
 
 local distro=$1
 local device=$(hostname)
-local error=0
 
 if [[ $distro -eq "arch" ]] ; then
 	[[ $device -ne "l4Pt0p" ]] && [[ $device -ne "D3sKt0P" ]] && echo "Device $device not recogniced" && exit 1
+	
+	local error=0
+
 	base_programs "$device"
 	install_packages "$device"
 	## Drivers
