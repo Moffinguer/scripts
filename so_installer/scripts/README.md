@@ -11,7 +11,7 @@
                    System >
                            Information >
                                         WindowsSpecs >
-                                                            Version
+                                                      Version
     ```
 
 2. Check if the latest version is the same as the one over [here](https://github.com/farag2/Sophia-Script-for-Windows/releases/latest).
