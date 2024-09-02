@@ -137,7 +137,73 @@ Possible solutions:
     } 
 }
 
+function Install-Fonts {
+    # Define URLs for the ZIP files
+    $urlFiraCode = "https://github.com/tonsky/FiraCode/releases/download/6.2/Fira_Code_v6.2.zip"
+    $urlIosevka = "https://github.com/be5invis/Iosevka/releases/download/v31.5.0/PkgTTC-SGr-IosevkaTermSS05-31.5.0.zip"
+
+    # Define folder and file names
+    $fontsFolder = "fonts"
+    $zipFiraCode = "Fira_Code_v6.2.zip"
+    $zipIosevka = "PkgTTC-SGr-IosevkaTermSS05-31.5.0.zip"
+
+    # Create 'fonts' folder if it doesn't exist
+    if (-Not (Test-Path $fontsFolder)) {
+        New-Item -Path $fontsFolder -ItemType Directory
+    }
+
+    # Download ZIP files
+    Write-Host "Downloading FiraCode ZIP..."
+    Invoke-WebRequest -Uri $urlFiraCode -OutFile (Join-Path $fontsFolder $zipFiraCode)
+    
+    Write-Host "Downloading Iosevka ZIP..."
+    Invoke-WebRequest -Uri $urlIosevka -OutFile (Join-Path $fontsFolder $zipIosevka)
+
+    # Extract ZIP files
+    Write-Host "Extracting FiraCode ZIP..."
+    Expand-Archive -Path (Join-Path $fontsFolder $zipFiraCode) -DestinationPath (Join-Path $fontsFolder "FiraCode")
+    
+    Write-Host "Extracting Iosevka ZIP..."
+    Expand-Archive -Path (Join-Path $fontsFolder $zipIosevka) -DestinationPath (Join-Path $fontsFolder "Iosevka")
+
+    # Install TTC fonts from Iosevka
+    $iosevkaFolder = Join-Path $fontsFolder "Iosevka"
+    Get-ChildItem -Path $iosevkaFolder -Filter *.ttc | ForEach-Object {
+        $fontPath = $_.FullName
+        Write-Host "Installing TTC font: $fontPath"
+        Copy-Item $fontPath -Destination "$env:SystemRoot\Fonts\$(($_.Name))"
+    }
+
+    # Install TTF fonts from FiraCode
+    $firaCodeFolder = Join-Path $fontsFolder "FiraCode" # Adjust if the folder structure is different
+    $firaCodeTtfFolder = Join-Path $firaCodeFolder "ttf"
+
+    Get-ChildItem -Path $firaCodeTtfFolder -Filter *.ttf | ForEach-Object {
+        $fontPath = $_.FullName
+        Write-Host "Installing TTF font: $fontPath"
+        Copy-Item $fontPath -Destination "$env:SystemRoot\Fonts\$(($_.Name))"
+    }
+
+    Write-Host "Font installation completed."
+}
+
+function Clean_temp_files {
+    $fontsFolder = "fonts"
+
+    # Remove 'fonts' folder and its contents
+    if (Test-Path $fontsFolder) {
+        Write-Host "Cleaning up temporary folder: $fontsFolder"
+        Remove-Item -Path $fontsFolder -Recurse -Force
+    } else {
+        Write-Host "No temporary folder found to clean."
+    }
+}
+
+
+
 #Requires -RunAsAdministrator
 
 Set-WallPaper -Image "C:\Wallpaper\Background.jpg" -Style Fit
 Set-LockscreenImage -ImagePath "C:\Images\lockscreen.jpg"
+Install-Fonts
+Clean_temp_files
