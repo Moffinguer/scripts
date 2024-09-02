@@ -140,7 +140,7 @@ Possible solutions:
 function Install-Fonts {
     # Define URLs for the ZIP files
     $urlFiraCode = "https://github.com/tonsky/FiraCode/releases/download/6.2/Fira_Code_v6.2.zip"
-    $urlIosevka = "https://github.com/be5invis/Iosevka/releases/download/v31.5.0/PkgTTC-SGr-IosevkaTermSS05-31.5.0.zip"
+    $urlIosevka = "https://github.com/be5invis/Iosevka/releases/download/v31.5.0/PkgTTC-SGr-IosevkaTerm-31.5.0.zip"
 
     # Define folder and file names
     $fontsFolder = "fonts"
