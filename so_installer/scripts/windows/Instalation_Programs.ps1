@@ -1,51 +1,137 @@
 # Using Winget to install all the programs, If possible
 
 function package_installer {
+    function Install-PackageAndVerify {
+        param (
+            [string]$PackageName,
+            [string]$Extras = "-i"
+        )
+
+        $installedPackage = winget list --id $PackageName
+        if ($installedPackage) {
+            Write-Host "The package $PackageName has been installed successfully."
+        } else {
+            Write-Host "Attempting to install $PackageName..."
+
+            winget install --id $PackageName $Extras
+
+            $installedPackage = winget list --id $PackageName
+
+            if ($installedPackage) {
+                Write-Host "The package $PackageName has been installed successfully."
+            } else {
+                Write-Host "The package $PackageName failed to install."
+            }
+        }
+    }
+
+    $jobs = @()
+    
     ## Search for the override parameters for each package
-    winget install --id Neovim.Neovim.Nightly -i
-    Write-Host "The package Neovim.Neovim.Nightly has been installed successfully."
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "Neovim.Neovim.Nightly"
+    }
 
-    winget install --id Discord.Discord -i
-    Write-Host "The package Discord.Discord has been installed successfully."
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "Discord.Discord"
+    }
 
-    winget install --id Brave.Brave -i
-    Write-Host "The package Brave.Brave has been installed successfully."
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "Brave.Brave"
+    }
 
-    winget install --id Mozilla.Firefox -i
-    Write-Host "The package Mozilla.Firefox has been installed successfully."
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "Mozilla.Firefox"
+    }
 
-    winget install --id Microsoft.VisualStudioCode -i
-    Write-Host "The package Microsoft.VisualStudioCode has been installed successfully."
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "Microsoft.VisualStudioCode"
+    }
 
-    winget install --id VideoLAN.VLC -i
-    Write-Host "The package VideoLAN.VLC has been installed successfully."
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "VideoLAN.VLC" # Substitutes for Windows Media Player and other video players
+    }
 
-    winget install --id mcmilk.7zip-zstd -i
-    Write-Host "The package mcmilk.7zip-zstd has been installed successfully."
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "mcmilk.7zip-zstd"
+    }
 
-    winget install --id c0re100.qBittorrent-Enhanced-Edition -i
-    Write-Host "The package c0re100.qBittorrent-Enhanced-Edition has been installed successfully."
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "c0re100.qBittorrent-Enhanced-Edition"
+    }
 
-    winget install --id Valve.Steam -i
-    Write-Host "The package Valve.Steam has been installed successfully."
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "Valve.Steam"
+    }
 
-    winget install --id Git.Git -i
-    Write-Host "The package Git.Git has been installed successfully."
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "Git.Git"
+    }
 
-    winget install --id nomacs.nomacs -i
-    Write-Host "The package nomacs.nomacs has been installed successfully."
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "nomacs.nomacs" # Substitutes for Windows image viewer
+    }
 
-    winget install --id Starship.Starship -i
-    Write-Host "The package Starship.Starship has been installed successfully."
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "JackieLiu.NotepadsApp" # Substitute for Windows notepad
+    }
+
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "Microsoft.PowerShell"
+    }
+
+    $jobs | ForEach-Object { 
+        $job = $_
+        Wait-Job $job
+        Remove-Job $job
+    }
+
+    Write-Host "All installations have been completed."
 }
 
 # Function to install external software
 function external_installers {
-    Start-Process -FilePath "..\..\utils\Install_Spotify.bat" -Wait
-    Write-Host "The external installer for Spotify has been executed successfully."
+    $spotifyInstaller = "..\..\utils\Install_Spotify.bat"
+
+    if (Test-Path $spotifyInstaller) {
+        Start-Process -FilePath $spotifyInstaller -Wait
+        Write-Host "The external Spotify installer has been executed successfully."
+    } else {
+        Write-Host "Spotify installer not found at: $spotifyInstaller"
+    }
+
+    $officeFolder = "office"
+    if (-Not (Test-Path $officeFolder)) {
+        New-Item -Path $officeFolder -ItemType Directory
+        Write-Host "'office' folder created."
+    } else {
+        Write-Host "'office' folder already exists."
+    }
+
+    $officeInstaller = "$officeFolder\OfficeSetup.exe"
+    $officeDownloadURL = "https://c2rsetup.officeapps.live.com/c2r/download.aspx?ProductreleaseID=O365ProPlusRetail&platform=x64&language=en-us&version=O16GA"
+    
+    if (-Not (Test-Path $officeInstaller)) {
+        Write-Host "Downloading Office..."
+        Invoke-WebRequest -Uri $officeDownloadURL -OutFile $officeInstaller
+        Write-Host "Office downloaded to $officeInstaller"
+    } else {
+        Write-Host "Office is already downloaded."
+    }
+
+    if (Test-Path $officeInstaller) {
+        Start-Process -FilePath $officeInstaller -Wait
+        Write-Host "The Office installer has been executed."
+    } else {
+        Write-Host "Office installer not found at $officeInstaller"
+    }
+
+    Write-Host "Running Windows activation with /Ohook and /HWID..."
+    irm https://get.activated.win | iex /Ohook /HWID
+    Write-Host "Activation completed."
 }
 
-function configuration {
+function prepare_configuration {
 
     ## TODO clone the dotfiles repo and move the folders acordingly
 
@@ -74,8 +160,23 @@ function configuration {
     Write-Host "The directory structure for Starship has been set up successfully."
 }
 
+
+# Borrar carpeta temporal de office
+function Clean_temp_files {
+    $officeFolder = "office"
+
+    if (Test-Path $officeFolder) {
+        Write-Host "Cleaning up temporary folder: $officeFolder"
+        Remove-Item -Path $officeFolder -Recurse -Force
+        Write-Host "Temporary folder removed."
+    } else {
+        Write-Host "No temporary folder found to clean."
+    }
+}
+
 #Requires -RunAsAdministrator
 
 package_installer
 external_installer
-configuration
+prepare_configuration
+Clean_temp_files
