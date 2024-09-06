@@ -41,7 +41,8 @@ You only need to run a Powershell Terminal as an Admin
 Execute one of this scripts:
 ```bash
  # You need a bash terminal for this, install git and run it
-  winget install -e --id Git.Git # With a Windows Terminal
+  winget install -id Git.Git -i # With a Windows Terminal
+  winget install --id Microsoft.PowerShell -i # Install Last version of Powershell
  cd .. && ./installer.sh # On a Bash Terminal
 ```
 ```ps1
