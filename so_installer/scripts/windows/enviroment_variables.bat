@@ -1,4 +1,5 @@
 @echo off
+setlocal
 
 net session >nul 2>&1
 if %errorlevel% neq 0 (
@@ -13,3 +14,5 @@ set starship_config_path=%root_folder%\Documents\starship\starship.toml
 
 setx STARSHIP_CONFIG "%starship_config_path%"
 setx STARSHIP_CACHE "%USERPROFILE%\AppData\Local\Temp"
+
+exit /b
