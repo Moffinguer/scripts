@@ -176,8 +176,8 @@ RecommendedTroubleshooting -Automatically
 FoldersLaunchSeparateProcess -Enable
 ReservedStorage -Disable
 F1HelpPage -Disable
-# NumLock -Enable
-# CapsLock -Disable
+NumLock -Enable
+CapsLock -Disable
 StickyShift -Disable
 Autoplay -Disable
 ThumbnailCacheRemoval -Disable
