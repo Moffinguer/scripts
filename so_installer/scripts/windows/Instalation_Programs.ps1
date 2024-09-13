@@ -32,9 +32,9 @@ function package_installer {
         Install-PackageAndVerify -PackageName "Neovim.Neovim.Nightly"
     }
 
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "Discord.Discord"
-    }
+    # $jobs += Start-Job -ScriptBlock {
+    #     Install-PackageAndVerify -PackageName "Discord.Discord"
+    # }
 
     $jobs += Start-Job -ScriptBlock {
         Install-PackageAndVerify -PackageName "Brave.Brave"
@@ -100,6 +100,32 @@ function external_installers {
         Write-Host "Spotify installer not found at: $spotifyInstaller"
     }
 
+    $discordFolder = "discord"
+    if (-Not (Test-Path $discordFolder)) {
+        New-Item -Path $discordFolder -ItemType Directory
+        Write-Host "'discord' folder created."
+    } else {
+        Write-Host "'discord' folder already exists."
+    }
+
+    $vencordInstaller = "$discordFolder\VencordInstaller.exe"
+    $vencordDownloadURL = "https://github.com/Vencord/Installer/releases/latest/download/VencordInstaller.exe"
+
+    if (-Not (Test-Path $vencordInstaller)) {
+        Write-Host "Downloading Vencord Installer..."
+        Invoke-WebRequest -Uri $vencordDownloadURL -OutFile $vencordInstaller
+        Write-Host "Vencord Installer downloaded to $vencordInstaller"
+    } else {
+        Write-Host "Vencord Installer is already downloaded."
+    }
+
+    if (Test-Path $vencordInstaller) {
+        Start-Process -FilePath $vencordInstaller -Wait
+        Write-Host "The Vencord installer has been executed."
+    } else {
+        Write-Host "Vencord installer not found at $vencordInstaller"
+    }
+
     $officeFolder = "office"
     if (-Not (Test-Path $officeFolder)) {
         New-Item -Path $officeFolder -ItemType Directory
@@ -127,7 +153,7 @@ function external_installers {
     }
 
     Write-Host "Running Windows activation with /Ohook and /HWID..."
-    irm https://get.activated.win | iex /Ohook /HWID
+    Invoke-RestMethod https://get.activated.win | Invoke-Expression /Ohook /HWID
     Write-Host "Activation completed."
 }
 
@@ -161,13 +187,21 @@ function prepare_configuration {
 }
 
 
-# Borrar carpeta temporal de office
 function Clean_temp_files {
     $officeFolder = "office"
+    $discordFolder = "discord"
 
     if (Test-Path $officeFolder) {
         Write-Host "Cleaning up temporary folder: $officeFolder"
         Remove-Item -Path $officeFolder -Recurse -Force
+        Write-Host "Temporary folder removed."
+    } else {
+        Write-Host "No temporary folder found to clean."
+    }
+
+    if (Test-Path $discordFolder) {
+        Write-Host "Cleaning up temporary folder: $discordFolder"
+        Remove-Item -Path $discordFolder -Recurse -Force
         Write-Host "Temporary folder removed."
     } else {
         Write-Host "No temporary folder found to clean."
