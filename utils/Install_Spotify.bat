@@ -1,6 +1,8 @@
 @echo off
 setlocal
 
+REM https://github.com/SpotX-Official/SpotX/discussions/60 Check params
+
 set param1=-confirm_uninstall_ms_spoti -confirm_spoti_recomended_uninstall -new_theme -topsearchbar -rightsidebar_off
 set param2=-rightsidebarcolor -lyrics_stat zing -adsections_off -funnyprogressBar -plus
 set param3=-language es -podcasts_on -block_update_on -no_shortcut
