@@ -32,10 +32,6 @@ function package_installer {
         Install-PackageAndVerify -PackageName "Neovim.Neovim.Nightly"
     }
 
-    # $jobs += Start-Job -ScriptBlock {
-    #     Install-PackageAndVerify -PackageName "Discord.Discord"
-    # }
-
     $jobs += Start-Job -ScriptBlock {
         Install-PackageAndVerify -PackageName "Brave.Brave"
     }
