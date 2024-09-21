@@ -185,7 +185,7 @@ SaveRestartableApps -Enable
 NetworkDiscovery -Enable
 DefaultTerminalApp -WindowsTerminal
 ###############################################################################
-# Export-Associations # Use when need to export all Windows associations
+Export-Associations # Use when need to export all Windows associations
 # Import-Associations # Use it on another computer
 ###############################################################################
 InstallVCRedist

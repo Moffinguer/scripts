@@ -91,7 +91,7 @@ function package_installer {
 
 # Function to install external software
 function external_installers {
-    $spotifyInstaller = "..\..\utils\Install_Spotify.bat"
+    $spotifyInstaller = ".\Windows\Install_Spotify.bat"
 
     if (Test-Path $spotifyInstaller) {
         Start-Process -FilePath $spotifyInstaller -Wait
