@@ -112,7 +112,7 @@ BingSearch -Disable
 StartRecommendationsTips -Hide
 StartAccountNotifications -Hide
 ThisPC -Show
-CheckBoxes -Enable
+CheckBoxes -Disable
 HiddenItems -Disable
 FileExtensions -Show
 MergeConflicts -Show
