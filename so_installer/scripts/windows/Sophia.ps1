@@ -177,7 +177,7 @@ FoldersLaunchSeparateProcess -Enable
 ReservedStorage -Disable
 F1HelpPage -Disable
 NumLock -Enable
-CapsLock -Disable
+CapsLock -Enable
 StickyShift -Disable
 Autoplay -Disable
 ThumbnailCacheRemoval -Disable
