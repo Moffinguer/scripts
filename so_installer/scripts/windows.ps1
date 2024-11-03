@@ -12,7 +12,7 @@ Set-Location -Path $PSScriptRoot
 ## Installing programs
 #.\Windows\Instalation_Programs.ps1
 
-## Customization
+## Customization 
 #.\Windows\Customization.ps1
 
 ## Enviromental Varibles
