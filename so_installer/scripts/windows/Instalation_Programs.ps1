@@ -76,6 +76,10 @@ function package_installer {
         Install-PackageAndVerify -PackageName "Microsoft.PowerShell"
     }
 
+    $jobs += Start-Job -ScriptBlock {
+        Install-PackageAndVerify -PackageName "Obsidian.Obsidian"
+    }
+
     $jobs | ForEach-Object { 
         $job = $_
         Wait-Job $job
@@ -83,6 +87,7 @@ function package_installer {
     }
 
     Write-Host "All installations have been completed."
+    Write-Host "##### Install Game Bar from Microsoft Store #####"
 }
 
 # Function to install external software
