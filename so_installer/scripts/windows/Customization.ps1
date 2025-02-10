@@ -1,104 +1,98 @@
+# ============================
+# Función: SetWallpaper
+# ============================
+# Cambia el fondo de pantalla del escritorio del usuario actual.
+function SetWallpaper {
 
-Function Set-WallPaper {
- 
-<#
- 
+    <#
     .SYNOPSIS
-    Applies a specified wallpaper to the current user's desktop.
-    https://www.joseespitia.com/2017/09/15/set-wallpaper-powershell-function/
-    https://www.reddit.com/r/WindowsHelp/comments/18bde3i/desktop_background_turns_black_after_each_restart/
-    
+    Cambia el fondo de pantalla del usuario actual.
+
     .PARAMETER Image
-    Provide the exact path to the image
- 
+    Ruta completa de la imagen que será usada como fondo de pantalla.
+
     .PARAMETER Style
-    Provide wallpaper style (Example: Fill, Fit, Stretch, Tile, Center, or Span)
-  
+    Estilo del fondo de pantalla: Fill, Fit, Stretch, Tile, Center o Span.
+
     .EXAMPLE
-    Set-WallPaper -Image "C:\Wallpaper\Default.jpg"
-    Set-WallPaper -Image "C:\Wallpaper\Background.jpg" -Style Fit
-  
-#>
- 
-param (
-    [parameter(Mandatory=$True)]
-    # Provide path to image
-    [string]$Image,
-    # Provide wallpaper style that you would like applied
-    [parameter(Mandatory=$False)]
-    [ValidateSet('Fill', 'Fit', 'Stretch', 'Tile', 'Center', 'Span')]
-    [string]$Style
-)
- 
-$WallpaperStyle = Switch ($Style) {
-  
-    "Fill" {"10"}
-    "Fit" {"6"}
-    "Stretch" {"2"}
-    "Tile" {"0"}
-    "Center" {"0"}
-    "Span" {"22"}
-  
-}
- 
-If($Style -eq "Tile") {
- 
-    New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name WallpaperStyle -PropertyType String -Value $WallpaperStyle -Force
-    New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name TileWallpaper -PropertyType String -Value 1 -Force
- 
-}
-Else {
- 
-    New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name WallpaperStyle -PropertyType String -Value $WallpaperStyle -Force
-    New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name TileWallpaper -PropertyType String -Value 0 -Force
- 
-}
- 
-Add-Type -TypeDefinition @" 
-using System; 
+    SetWallpaper -Image "C:\Wallpaper\Default.jpg"
+    SetWallpaper -Image "C:\Wallpaper\Background.jpg" -Style Fit
+    #>
+
+    param (
+        [parameter(Mandatory=$True)]
+        [string]$Image,
+
+        [parameter(Mandatory=$False)]
+        [ValidateSet('Fill', 'Fit', 'Stretch', 'Tile', 'Center', 'Span')]
+        [string]$Style
+    )
+
+    # Convertir el estilo a los valores esperados del registro
+    $wallpaperStyle = Switch ($Style) {
+        "Fill" {"10"}
+        "Fit" {"6"}
+        "Stretch" {"2"}
+        "Tile" {"0"}
+        "Center" {"0"}
+        "Span" {"22"}
+    }
+
+    # Configurar los valores en el registro
+    if ($Style -eq "Tile") {
+        New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name WallpaperStyle -PropertyType String -Value $wallpaperStyle -Force
+        New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name TileWallpaper -PropertyType String -Value 1 -Force
+    } else {
+        New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name WallpaperStyle -PropertyType String -Value $wallpaperStyle -Force
+        New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name TileWallpaper -PropertyType String -Value 0 -Force
+    }
+
+    # Actualizar el fondo de pantalla
+    Add-Type -TypeDefinition @"
+using System;
 using System.Runtime.InteropServices;
-  
+
 public class Params
-{ 
+{
     [DllImport("User32.dll",CharSet=CharSet.Unicode)] 
     public static extern int SystemParametersInfo (Int32 uAction, 
                                                    Int32 uParam, 
                                                    String lpvParam, 
                                                    Int32 fuWinIni);
 }
-"@ 
-  
+"@
+
     $SPI_SETDESKWALLPAPER = 0x0014
-    $UpdateIniFile = 0x01
-    $SendChangeEvent = 0x02
-  
-    $fWinIni = $UpdateIniFile -bor $SendChangeEvent
-  
+    $updateIniFile = 0x01
+    $sendChangeEvent = 0x02
+    $fWinIni = $updateIniFile -bor $sendChangeEvent
+
     [Params]::SystemParametersInfo($SPI_SETDESKWALLPAPER, 0, $Image, $fWinIni)
 }
 
-## Lock Screen
-function Set-LockscreenImage
-{
-<#
-.SYNOPSIS
-PowerShell script to set a local image as the lockscreen background.
-https://github.com/nccgroup/Change-Lockscreen/blob/master/Change-Lockscreen.ps1
 
-.PARAMETER ImagePath
-Specify the full path to the image that you want to set as the lockscreen background.
+# ============================
+# Función: SetLockscreenImage
+# ============================
+# Cambia la imagen de la pantalla de bloqueo.
+function SetLockscreenImage {
+    <#
+    .SYNOPSIS
+    Cambia la imagen de la pantalla de bloqueo.
 
-.EXAMPLE
-    PS C:\> . .\Set-LockscreenImage.ps1
-    PS C:\> Set-LockscreenImage -ImagePath "C:\Images\lockscreen.jpg"
-#>
+    .PARAMETER ImagePath
+    Ruta completa de la imagen.
+
+    .EXAMPLE
+    SetLockscreenImage -ImagePath "C:\Images\lockscreen.jpg"
+    #>
 
     [CmdletBinding()]
     Param (
         [Parameter(Mandatory=$true, Position=0)]
         [String]$ImagePath     
-    ) 
-    
+    )
+
     # Load necessary types for handling the lockscreen image
     [Windows.System.UserProfile.LockScreen,Windows.System.UserProfile,ContentType=WindowsRuntime] | Out-Null
     Add-Type -AssemblyName System.Runtime.WindowsRuntime
@@ -140,83 +134,106 @@ Possible solutions:
 function Install-Fonts {
     # Define URLs for the ZIP files
     $urls = @{
-        "FiraCode" = "https://github.com/tonsky/FiraCode/releases/download/6.2/Fira_Code_v6.2.zip"
-        "Iosevka" = "https://github.com/be5invis/Iosevka/releases/download/v31.5.0/PkgTTC-SGr-IosevkaTermSS05-31.5.0.zip"
-        "Agave" = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/Agave.zip"
-        "JetBrainsMono" = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/JetBrainsMono.zip"
+        "FiraCode"      = "https://github.com/tonsky/FiraCode/releases/download/6.2/Fira_Code_v6.2.zip"
+        "Iosevka"       = "https://github.com/be5invis/Iosevka/releases/download/v32.3.0/PkgTTF-IosevkaTermSS05-32.3.0.zip"
+        "Agave"         = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Agave.zip"
+        "JetBrainsMono" = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/JetBrainsMono.zip"
     }
 
-    # Define folder and file names
     $fontsFolder = "fonts"
-    $files = @{
-        "FiraCode" = "Fira_Code_v6.2.zip"
-        "Iosevka" = "PkgTTC-SGr-IosevkaTermSS05-31.5.0.zip"
-        "Agave" = "Agave.zip"
-        "JetBrainsMono" = "JetBrainsMono.zip"
+
+    # Crear carpeta si no existe
+    if (-not (Test-Path $fontsFolder)) {
+        New-Item -Path $fontsFolder -ItemType Directory | Out-Null
     }
 
-    # Create 'fonts' folder if it doesn't exist
-    if (-Not (Test-Path $fontsFolder)) {
-        New-Item -Path $fontsFolder -ItemType Directory
-    }
-
-    # Download and extract ZIP files
     foreach ($key in $urls.Keys) {
-        Write-Host "Downloading $key ZIP..."
-        Invoke-WebRequest -Uri $urls[$key] -OutFile (Join-Path $fontsFolder $files[$key])
-        
-        Write-Host "Extracting $key ZIP..."
-        Expand-Archive -Path (Join-Path $fontsFolder $files[$key]) -DestinationPath (Join-Path $fontsFolder $key)
-    }
+        $zipPath = Join-Path $fontsFolder "$key.zip"
+        $destinationFolder = Join-Path $fontsFolder $key
 
-    # Install TTC fonts from Iosevka
-    $iosevkaFolder = Join-Path $fontsFolder "Iosevka"
-    Get-ChildItem -Path $iosevkaFolder -Filter *.ttc | ForEach-Object {
-        $fontPath = $_.FullName
-        Write-Host "Installing TTC font: $fontPath"
-        Copy-Item $fontPath -Destination "$env:SystemRoot\Fonts\$(($_.Name))"
-    }
+        # Descargar fuente si no existe
+        if (-not (Test-Path $zipPath)) {
+            Write-Host "Descargando $key..."
+            Invoke-WebRequest -Uri $urls[$key] -OutFile $zipPath
+        }
 
-    # Install TTF fonts from FiraCode
-    $firaCodeFolder = Join-Path $fontsFolder "FiraCode" # Adjust if the folder structure is different
-    $firaCodeTtfFolder = Join-Path $firaCodeFolder "ttf"
+        # Extraer fuente
+        if (-not (Test-Path $destinationFolder)) {
+            Expand-Archive -Path $zipPath -DestinationPath $destinationFolder
+        }
 
-    Get-ChildItem -Path $firaCodeTtfFolder -Filter *.ttf | ForEach-Object {
-        $fontPath = $_.FullName
-        Write-Host "Installing TTF font: $fontPath"
-        Copy-Item $fontPath -Destination "$env:SystemRoot\Fonts\$(($_.Name))"
-    }
-
-    # Install TTF fonts from Nerd Fonts
-    foreach ($key in @("Agave", "JetBrainsMono")) {
-        $nerdFontFolder = Join-Path $fontsFolder $key
-        Get-ChildItem -Path $nerdFontFolder -Filter *.ttf | ForEach-Object {
-            $fontPath = $_.FullName
-            Write-Host "Installing TTF font: $fontPath"
-            Copy-Item $fontPath -Destination "$env:SystemRoot\Fonts\$(($_.Name))"
+        # Instalar las fuentes
+        Get-ChildItem -Path $destinationFolder -Recurse -Filter *.ttf,*.ttc | ForEach-Object {
+            Copy-Item $_.FullName -Destination "$env:SystemRoot\Fonts\$(($_.Name))"
         }
     }
 
-    Write-Host "Font installation completed."
+    Write-Host "Instalación de fuentes completada."
 }
 
-function Clean_temp_files {
-    $fontsFolder = "fonts"
 
-    # Remove 'fonts' folder and its contents
-    if (Test-Path $fontsFolder) {
-        Write-Host "Cleaning up temporary folder: $fontsFolder"
-        Remove-Item -Path $fontsFolder -Recurse -Force
-    } else {
-        Write-Host "No temporary folder found to clean."
+# ============================
+# Función: CleanTempFiles
+# ============================
+# Limpia carpetas temporales utilizadas durante el proceso.
+function CleanTempFiles {
+    param ()
+
+    $foldersToClean = @("fonts", "wallpapers")
+
+    foreach ($folder in $foldersToClean) {
+        if (Test-Path $folder) {
+            Remove-Item -Path $folder -Recurse -Force
+        }
     }
 }
 
 
+# ============================
+# Función: DownloadAndSaveImages
+# ============================
+# Descarga imágenes desde URLs específicas y las guarda en una ruta dada.
+function DownloadAndSaveImages {
+    param (
+        [string]$url,
+        [string]$destinationPath
+    )
 
-#Requires -RunAsAdministrator
+    try {
+        Invoke-WebRequest -Uri $url -OutFile $destinationPath
+        Write-Host "Descargado: $url a $destinationPath"
+    } catch {
+        Write-Host "Error al descargar $url: $_" -ForegroundColor Red
+    }
+}
 
-Set-WallPaper -Image "C:\Wallpaper\Background.jpg" -Style Fit
-Set-LockscreenImage -ImagePath "C:\Images\lockscreen.jpg"
-Install-Fonts
-Clean_temp_files
+
+# ============================
+# Lógica principal del script
+# ============================
+
+# Crear carpeta para wallpapers
+$wallpapersFolder = "wallpapers"
+if (-not (Test-Path $wallpapersFolder)) {
+    New-Item -ItemType Directory -Path $wallpapersFolder | Out-Null
+}
+
+# Descargar imágenes de fondo
+DownloadAndSaveImages -url "https://github.com/Moffinguer/Wallpapers/raw/desktop/demonic%20skull.jpg" -destinationPath "$wallpapersFolder\Background.jpg"
+DownloadAndSaveImages -url "https://github.com/Moffinguer/Wallpapers/raw/desktop/universe-programmer.jpg" -destinationPath "$wallpapersFolder\lockscreen.jpg"
+
+# Aplicar fondo de pantalla y pantalla de bloqueo
+SetWallpaper -Image "$wallpapersFolder\Background.jpg" -Style Fit
+SetLockscreenImage -ImagePath "$wallpapersFolder\lockscreen.jpg"
+
+# Instalar fuentes y limpiar archivos temporales
+InstallFonts
+CleanTempFiles
+
+
+# To allow the execution of custom scripts after everything has ended
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+
+echo "Activate Old Context Menu"
+reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve

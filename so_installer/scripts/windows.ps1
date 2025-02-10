@@ -4,21 +4,23 @@ Set-Location -Path $PSScriptRoot
 #Requires -RunAsAdministrator
 
 ## Debloat
+echo "Run Sophia Script, this will take a while..."
 .\Windows\Sophia.ps1
 
-## Uninstall Programs
-# After doing a reboot I would like to check which packages can be removed
+## Check Health
+echo "Checking Health..."
+.\Windows\check_health.bat
 
 ## Installing programs
-#.\Windows\Instalation_Programs.ps1
+echo "Installing Programs..."
+.\Windows\instalation_programs.ps1
 
 ## Customization 
-#.\Windows\Customization.ps1
+echo "Customization..."
+.\Windows\customization.ps1
 
 ## Enviromental Varibles
-#Start-Process -FilePath ".\Windows\enviroment_variables.bat" -Wait
-
-# To allow the execution of custom scripts after everything has ended
-#Set-ExecutionPolicy  RemoteSigned -Scope CurrentUser
+echo "Set Enviromental Variables..."
+Start-Process -FilePath ".\Windows\enviroment_variables.bat" -Wait
 
 Exit 0

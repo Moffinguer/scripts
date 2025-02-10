@@ -1,83 +1,64 @@
-# Using Winget to install all the programs, If possible
+# ===============================
+# Función: Install-PackageAndVerify
+# ===============================
+# Instala un paquete y verifica si se ha instalado correctamente.
+function Install-PackageAndVerify {
+    param (
+        [string]$PackageName,
+        [string]$Extras = "-i"
+    )
 
-function package_installer {
-    function Install-PackageAndVerify {
-        param (
-            [string]$PackageName,
-            [string]$Extras = "-i"
-        )
+    $installedPackage = winget list --id $PackageName
+    if ($installedPackage) {
+        Write-Host "El paquete $PackageName se ha instalado correctamente."
+    } else {
+        Write-Host "Intentando instalar $PackageName..."
+
+        winget install --id $PackageName $Extras
 
         $installedPackage = winget list --id $PackageName
+
         if ($installedPackage) {
-            Write-Host "The package $PackageName has been installed successfully."
+            Write-Host "El paquete $PackageName se ha instalado correctamente."
         } else {
-            Write-Host "Attempting to install $PackageName..."
-
-            winget install --id $PackageName $Extras
-
-            $installedPackage = winget list --id $PackageName
-
-            if ($installedPackage) {
-                Write-Host "The package $PackageName has been installed successfully."
-            } else {
-                Write-Host "The package $PackageName failed to install."
-            }
+            Write-Host "El paquete $PackageName falló al instalarse."
         }
     }
+}
 
+# ============================
+# Función: Package-Installer
+# ============================
+# Instala todos los paquetes necesarios utilizando Winget.
+function Package-Installer {
     $jobs = @()
-    
-    ## Search for the override parameters for each package
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "Neovim.Neovim.Nightly"
-    }
 
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "Brave.Brave"
-    }
+    # Instalar los paquetes en segundo plano
+    $packages = @(
+        "Neovim.Neovim.Nightly",
+        "Brave.Brave",
+        "Mozilla.Firefox",
+        "Microsoft.VisualStudioCode",
+        "VideoLAN.VLC",
+        "mcmilk.7zip-zstd",
+        "c0re100.qBittorrent-Enhanced-Edition",
+        "Valve.Steam",
+        "Git.Git",
+        "nomacs.nomacs",
+        "JackieLiu.NotepadsApp",
+        "Microsoft.PowerShell",
+        "Obsidian.Obsidian",
+        "PeterPawlowski.foobar2000",
+        "Microsoft.PowerToys",
+        "Starship.Starship",
+        "Flameshot.Flameshot",
+        "voidtools.Everything"
+    )
 
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "Mozilla.Firefox"
-    }
-
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "Microsoft.VisualStudioCode"
-    }
-
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "VideoLAN.VLC" # Substitutes for Windows Media Player and other video players
-    }
-
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "mcmilk.7zip-zstd"
-    }
-
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "c0re100.qBittorrent-Enhanced-Edition"
-    }
-
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "Valve.Steam"
-    }
-
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "Git.Git"
-    }
-
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "nomacs.nomacs" # Substitutes for Windows image viewer
-    }
-
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "JackieLiu.NotepadsApp" # Substitute for Windows notepad
-    }
-
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "Microsoft.PowerShell"
-    }
-
-    $jobs += Start-Job -ScriptBlock {
-        Install-PackageAndVerify -PackageName "Obsidian.Obsidian"
+    foreach ($package in $packages) {
+        $jobs += Start-Job -ScriptBlock {
+            Install-PackageAndVerify -PackageName $using:package
+        }
     }
 
     $jobs | ForEach-Object { 
@@ -86,132 +67,93 @@ function package_installer {
         Remove-Job $job
     }
 
-    Write-Host "All installations have been completed."
-    Write-Host "##### Install Game Bar from Microsoft Store #####"
+    Write-Host "Todas las instalaciones se han completado."
 }
 
-# Function to install external software
-function external_installers {
-    $spotifyInstaller = ".\Windows\Install_Spotify.bat"
+# ============================
+# Función: External-Installers
+# ============================
+# Instala software externo (como Spotify y Office).
+function External-Installers {
+    $spotifyInstaller = ".\Windows\install_spotify.bat" 
 
     if (Test-Path $spotifyInstaller) {
         Start-Process -FilePath $spotifyInstaller -Wait
-        Write-Host "The external Spotify installer has been executed successfully."
+        Write-Host "El instalador externo de Spotify se ha ejecutado correctamente."
     } else {
-        Write-Host "Spotify installer not found at: $spotifyInstaller"
-    }
-
-    $discordFolder = "discord"
-    if (-Not (Test-Path $discordFolder)) {
-        New-Item -Path $discordFolder -ItemType Directory
-        Write-Host "'discord' folder created."
-    } else {
-        Write-Host "'discord' folder already exists."
-    }
-
-    $vencordInstaller = "$discordFolder\VencordInstaller.exe"
-    $vencordDownloadURL = "https://github.com/Vencord/Installer/releases/latest/download/VencordInstaller.exe"
-
-    if (-Not (Test-Path $vencordInstaller)) {
-        Write-Host "Downloading Vencord Installer..."
-        Invoke-WebRequest -Uri $vencordDownloadURL -OutFile $vencordInstaller
-        Write-Host "Vencord Installer downloaded to $vencordInstaller"
-    } else {
-        Write-Host "Vencord Installer is already downloaded."
-    }
-
-    if (Test-Path $vencordInstaller) {
-        Start-Process -FilePath $vencordInstaller -Wait
-        Write-Host "The Vencord installer has been executed."
-    } else {
-        Write-Host "Vencord installer not found at $vencordInstaller"
+        Write-Host "No se encontró el instalador de Spotify en: $spotifyInstaller"
     }
 
     $officeFolder = "office"
     if (-Not (Test-Path $officeFolder)) {
         New-Item -Path $officeFolder -ItemType Directory
-        Write-Host "'office' folder created."
-    } else {
-        Write-Host "'office' folder already exists."
+        Write-Host "Se ha creado la carpeta 'office'."
     }
 
     $officeInstaller = "$officeFolder\OfficeSetup.exe"
     $officeDownloadURL = "https://c2rsetup.officeapps.live.com/c2r/download.aspx?ProductreleaseID=O365ProPlusRetail&platform=x64&language=en-us&version=O16GA"
     
     if (-Not (Test-Path $officeInstaller)) {
-        Write-Host "Downloading Office..."
+        Write-Host "Descargando Office..."
         Invoke-WebRequest -Uri $officeDownloadURL -OutFile $officeInstaller
-        Write-Host "Office downloaded to $officeInstaller"
-    } else {
-        Write-Host "Office is already downloaded."
+        Write-Host "Office descargado a $officeInstaller"
     }
 
     if (Test-Path $officeInstaller) {
         Start-Process -FilePath $officeInstaller -Wait
-        Write-Host "The Office installer has been executed."
+        Write-Host "El instalador de Office se ha ejecutado."
     } else {
-        Write-Host "Office installer not found at $officeInstaller"
+        Write-Host "No se encontró el instalador de Office en $officeInstaller"
     }
 
-    Write-Host "Running Windows activation with /Ohook and /HWID..."
+    Write-Host "Ejecutando activación de Windows con /Ohook y /HWID..."
     Invoke-RestMethod https://get.activated.win | Invoke-Expression /Ohook /HWID
-    Write-Host "Activation completed."
+    Write-Host "Activación completada."
 }
 
-function prepare_configuration {
+# ============================
+# Función: Prepare-Configuration
+# ============================
+# Prepara la configuración necesaria para las herramientas.
+function Prepare-Configuration {
+    # Configuración de Starship
+    $rootFolder = "$env:USERPROFILE\Documents"
+    $starshipFolder = "$rootFolder\starship"
+    $starshipConfigPath = "$starshipFolder\starship.toml"
+    $starshipCachePath = "$env:USERPROFILE\AppData\Local\Temp"
 
-    ## TODO clone the dotfiles repo and move the folders acordingly
-
-    # Starship, check the enviroment_variables.bat for correct routes
-    $root_folder = "$env:USERPROFILE\Documents"
-    $starship_folder = "$root_folder\starship"
-    $starship_config_path = "$starship_folder\starship.toml"
-    $starship_cache_path = "$env:USERPROFILE\AppData\Local\Temp"
-
-    ## TODO BEGIN instead of creating the files and folders, move them from the cloned repo
-    if (-not (Test-Path $starship_folder)) {
-        New-Item -ItemType Directory -Path $starship_folder | Out-Null
-        Write-Host "The folder 'starship' has been created at: $starship_folder"
+    # Crear carpetas necesarias
+    if (-not (Test-Path $starshipCachePath)) {
+        New-Item -ItemType Directory -Path $starshipCachePath | Out-Null
+        Write-Host "La carpeta Temp ha sido creada en: $starshipCachePath"
     }
 
-    if (-not (Test-Path $starship_config_path)) {
-        New-Item -ItemType File -Path $starship_config_path | Out-Null
-        Write-Host "The file 'starship.toml' has been created at: $starship_config_path"
-    }
-    ## TODO END
-    if (-not (Test-Path $starship_cache_path)) {
-        New-Item -ItemType Directory -Path $starship_cache_path | Out-Null
-        Write-Host "The Temp folder has been created at: $starship_cache_path"
-    }
-
-    Write-Host "The directory structure for Starship has been set up successfully."
+    Write-Host "La estructura de directorios para Starship ha sido configurada correctamente."
 }
 
-
-function Clean_temp_files {
+# ============================
+# Función: Clean-Temp-Files
+# ============================
+# Limpia los archivos temporales utilizados durante el proceso.
+function Clean-Temp-Files {
     $officeFolder = "office"
-    $discordFolder = "discord"
 
     if (Test-Path $officeFolder) {
-        Write-Host "Cleaning up temporary folder: $officeFolder"
+        Write-Host "Limpiando la carpeta temporal: $officeFolder"
         Remove-Item -Path $officeFolder -Recurse -Force
-        Write-Host "Temporary folder removed."
+        Write-Host "Carpeta temporal eliminada."
     } else {
-        Write-Host "No temporary folder found to clean."
-    }
-
-    if (Test-Path $discordFolder) {
-        Write-Host "Cleaning up temporary folder: $discordFolder"
-        Remove-Item -Path $discordFolder -Recurse -Force
-        Write-Host "Temporary folder removed."
-    } else {
-        Write-Host "No temporary folder found to clean."
+        Write-Host "No se encontró una carpeta temporal para limpiar."
     }
 }
 
+# ============================
+# Lógica principal del script
+# ============================
+# Requiere permisos de administrador
 #Requires -RunAsAdministrator
 
-package_installer
-external_installer
-prepare_configuration
-Clean_temp_files
+Package-Installer
+External-Installers
+Prepare-Configuration
+Clean-Temp-Files
