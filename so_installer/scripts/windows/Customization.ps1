@@ -237,3 +237,15 @@ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 echo "Activate Old Context Menu"
 reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve
+
+
+$desktopPath = [System.Environment]::GetFolderPath('Desktop')
+$folderName = "GodMode.{ED7BA470-8E54-465E-825C-99712043E01C}"
+$godModePath = Join-Path -Path $desktopPath -ChildPath $folderName
+
+if (-not (Test-Path -Path $godModePath)) {
+    New-Item -Path $godModePath -ItemType Directory
+    Write-Host "Folder GodMode created in the user's desktop."
+} else {
+    Write-Host "Folder GodMode already exists in the user's desktop."
+}

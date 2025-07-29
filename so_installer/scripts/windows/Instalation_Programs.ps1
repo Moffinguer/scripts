@@ -47,12 +47,15 @@ function Package-Installer {
         "nomacs.nomacs",
         "JackieLiu.NotepadsApp",
         "Microsoft.PowerShell",
-        "Obsidian.Obsidian",
         "PeterPawlowski.foobar2000",
         "Microsoft.PowerToys",
-        "Starship.Starship",
         "Flameshot.Flameshot",
-        "voidtools.Everything"
+        "voidtools.Everything",
+        "File-New-Project.EarTrumpet",
+        "StartIsBack.StartAllBack",
+        "Microsoft.Sysinternals.ProcessMonitor",
+        "aristocratos.btop4win",
+        "BleachBit.BleachBit"
     )
 
     foreach ($package in $packages) {
@@ -157,3 +160,5 @@ Package-Installer
 External-Installers
 Prepare-Configuration
 Clean-Temp-Files
+
+
